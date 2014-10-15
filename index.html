@@ -1,0 +1,260 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	<link rel="stylesheet" href="app/css/style.css">
+	<link rel="stylesheet" href="vendors/bootstrap/datepicker/css/bootstrap-datetimepicker.css">
+	<link rel="stylesheet" href="vendors/bootstrap/tables/bootstrap-table.css">
+
+  </head>
+  <body ng-app="IncidentForm">
+  	<nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">Incident Form</a>
+        </div>
+      </div>  
+    </nav>
+
+  	<div class="container"></html>
+  		<ul class="nav nav-tabs" role="tablist" id="incFormTabs">
+	        <li class="active"><a role="tab" data-toggle="tab" href="#general">General Information</a></li>
+	        <li><a role="tab" data-toggle="tab" href="#corrective">Corrective Actions</a></li>
+	        <li><a role="tab" data-toggle="tab" href="#submit"><span class="text-uppecase">Rewiew</span> and <span class="text-uppercase">Submit</span></a></li>
+	    </ul>
+  	</div>
+
+  	<div class="tab-content container" id="">
+  		
+  		<!--General Information Tab-->
+  		
+  		<div class="tab-pane fade in active" id="general" ng-controller="generalTab">
+	  		<div class="row">
+	  			<p class="block-info col-sm-offset-1 col-sm-10"><span class="glyphicon glyphicon-warning-sign"></span>Please complete the below based on available information. Click on applicable tabs above to enter additional information related to the incident. When complete click '<span class="text-uppecase">Rewiew</span> and <span class="text-uppercase">Submit</span>' tab above.</p>
+	  		</div>
+	  		<div class="row">
+	  			<form role="form" class="form-horizontal">
+	  				<div class="col-sm-6">
+	  					<div class="form-group">
+				          <label class="control-label col-sm-4" for="dateIncident">* Date and Time of Incident:</label>
+				          <div class="col-sm-8">
+				            <div class='input-group input-append date form_datetime'>
+			                    <input type='text' class="form-control" id='dateIncident' required ng-model="general.dateIncident"/>
+			                    <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
+			                    </span>
+			                </div>
+				          </div>
+				        </div>
+				        <div class="form-group">
+				          <label class="control-label col-sm-4" for="reportedBy">* Reported By:</label>
+				          <div class="col-sm-8">          
+				            <input type="text" class="form-control" id="reportedBy" required ng-model="general.reportedBy" placeholder="Your Name">
+				          </div>
+				        </div>
+				        <div class="form-group">
+				          <label class="control-label col-sm-4" for="companyReporter">* Company of Reporter:</label>
+				          <div class="col-sm-8">          
+				            <select class="form-control" id="companyReporter" required ng-model="general.companyReporter.current">
+				            	<option value="0" selected="selected">Choose...</option>
+				            	<option ng-repeat="cr in general.companyReporter.data">{{cr.title}}</option>
+				            </select>
+				          </div>
+				        </div>
+				        <div class="form-group">
+				          <label class="control-label col-sm-4" for="contactNumber">* Contact Number:</label>
+				          <div class="col-sm-8">          
+				             <input type="text" class="form-control" id="contactNumber" required ng-model="general.contactNumber" placeholder="Your phone number">
+				          </div>
+				        </div>
+				        <div class="form-group">
+				          <label class="optional control-label col-sm-4" for="supervisorName">Supervisor Name:</label>
+				          <div class="col-sm-8">          
+				             <input type="text" class="form-control" ng-model="general.supervisorName" id="supervisorName">
+				          </div>
+				        </div>
+				        <div class="form-group">
+				          <label class="control-label col-sm-4" for="description">* High Level Description of Incident:</label>
+				          <div class="col-sm-8">          
+				             <textarea class="form-control" rows="5" required ng-model="general.description" id="description"></textarea>
+				          </div>
+				        </div>
+	  				</div>
+	  				<div class="col-sm-6">
+	  					<div class="form-group">
+				          <p class="col-sm-12 form-control-static input-lg text-center">Well Information:</p>
+				        </div>
+				        <div class="form-group">
+				          <label class="control-label col-sm-4" for="wellNumber">* Well Number:</label>
+				          <div class="col-sm-8">          
+				            <select class="form-control" id="wellNumber" ng-model="general.wellNumber.current">
+				            	<option value="0" selected="selected">Choose...</option>
+				            	<option ng-repeat="wn in general.wellNumber.data">{{wn.well}}</option>
+				            </select>
+				          </div>
+				        </div>
+				        <div class="form-group">
+				          <label class="optional control-label col-sm-4" for="region">Region:</label>
+				          <div class="col-sm-8">          
+				             <input type="text" class="form-control" id="region" ng-model="general.wellNumber.getByWell(general.wellNumber.current).Region" readonly="true">
+				          </div>
+				        </div>
+				        <div class="form-group">
+				          <label class="optional control-label col-sm-4" for="state">State:</label>
+				          <div class="col-sm-8">          
+				             <input type="text" class="form-control" id="state" ng-model="general.wellNumber.getByWell(general.wellNumber.current).State" readonly="true">
+				          </div>
+				        </div>
+				        <div class="form-group">
+				          <label class="optional control-label col-sm-4" for="fieldOffice">Field Office:</label>
+				          <div class="col-sm-8">          
+				             <input type="text" class="form-control" id="fieldOffice" ng-model="general.wellNumber.getByWell(general.wellNumber.current)['Field Office']" readonly="true">
+				          </div>
+				        </div>
+				        <div class="form-group">
+				          <label class="control-label col-sm-4" for="checkSeverity">* Incident Severity (Check all that Apply):</label>
+				          <div class="col-sm-8">          
+				             <div class="check-group col-sm-12 input-group">
+				             	<div class="checkbox"><label class="col-sm-12"><input type="checkbox"> Loss well controll</label></div>
+				             	<div class="checkbox"><label class="col-sm-12"><input type="checkbox"> Fatality(ies)</label></div>
+				             	<div class="checkbox"><label class="col-sm-12"><input type="checkbox"> Hospitalization or medical treatment</label></div>
+				             	<div class="checkbox"><label class="col-sm-12"><input type="checkbox"> Spill offsite > 50 Dbls</label></div>
+				             	<div class="checkbox"><label class="col-sm-12"><input type="checkbox"> Spill to water, any amount</label></div>
+				             	<div class="checkbox"><label class="col-sm-12"><input type="checkbox"> Property damage</label></div>
+				             	<div class="with-border-top checkbox"><label class="col-sm-12"><input type="checkbox"> None Apply</label></div>
+				             </div>
+				             
+				          </div>
+				        </div>
+	  				</div>
+	  			</form>
+	  		</div>
+	  	</div>	
+  	
+	  	<!--Corrective Actions Tab-->
+  		
+  		<div class="tab-pane fade" id="corrective">
+	  		<div class="row">
+	  			<p class="block-info col-sm-offset-1 col-sm-10" role="alert"><span class="glyphicon glyphicon-warning-sign"></span>Please complete the table below.</p>
+	  		</div>
+	  		<div class="row">
+	  			<h4 class="col-sm-6 col-xs-6">Immediate Corrective Action(s) <span class="badge">3 of 5 available</span></h4>
+	  			<div class="col-sm-6 col-xs-6 text-right">
+	  				<a class="btn btn-sm btn-primary"><span class="glyphicon glyphicon-plus-sign"></span> add action</a>
+	  				<a class="btn btn-sm btn-danger"><span class="glyphicon glyphicon-remove"></span> remove</a>
+	  				<a class="btn btn-sm btn-info"><span class="glyphicon glyphicon-edit"></span> edit</a>
+	  			</div>
+	  		</div>
+	  		<div class="with-table row">
+	  			<div class="table-responsive">
+				  <table id="correctiveActionTb" data-toggle="table" data-sort-name="date" data-sort-order="desc">
+    				<thead>
+				   	<tr>
+				  		<th data-field="state" data-radio="true" data-sortable="true"></th>
+				  		<th class="text-center" data-field="descrCA" data-sortable="true">Description of Corrective Action *</th>
+				  		<th class="text-center" data-field="takenBy" data-sortable="true">Action Taken By (name) *</th>
+				  		<th class="text-center" data-field="company" data-sortable="true">Company *</th>
+				  		<th class="text-center" data-field="date" data-sortable="true">Date *</th>
+				  	</tr>
+				  	</thead>
+				  </table>
+				</div>
+	  		</div>
+	  	</div>	
+  	
+  		<!--Rewiew and Submit Tab-->
+
+	  	<div class="tab-pane fade" id="submit">	
+	  		<div class="row">
+	  			<p class="block-info col-sm-offset-1 col-sm-9 col-xs-8"><span class="glyphicon glyphicon-warning-sign"></span> Please complete the below based on available information. Click on applicable tabs above to enter additional information related to the incident. When complete click '<span class="text-uppecase">Review</span> and <span class="text-uppercase">Submit</span>' tab above.</p>
+	  			<p class="block-info col-sm-2 col-xs-4 text-center"><a class="btn btn-success disabled"><span class="glyphicon glyphicon-ok"></span> Submit</a></p>
+	  		</div>
+	  		<h4 class="row">General Information:</h4>
+	  		<div class="with-table row">
+	  			<div class="table-responsive without-left-border" ng-controller="tableStyle">{{zebra('active')}}
+				  	<table id="generalReviewTb" data-toggle="table" data-show-header="false" data-row-style="zebraRows">
+				  		<thead>
+						    <tr>
+						        <th data-field="name" data-align="right">Name</th>
+						        <th data-field="value">Value</th>
+						    </tr>
+					    </thead>
+				  	</table>
+				</div>
+	  		</div>
+	  		<h4 class="row">Immediate Corrective Action(s):</h4>
+	  		<div class="with-table row">
+	  			<div class="table-responsive without-left-border" ng-controller="tableStyle">
+	  				<table id="correctiveReviewTb" data-toggle="table" data-show-header="false" data-row-style="zebraRows">
+				  		<thead>
+						    <tr>
+						        <th data-field="name" data-align="right">Name</th>
+						        <th data-field="value">Value</th>
+						    </tr>
+					    </thead>
+				  	</table>
+				</div>
+	  		</div>
+	  	</div>	
+  	</div>
+
+  	<div class="modal fade" id="correctiveActionForm" tabindex="-1" data-keyboard="true" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    	 <div class="modal-dialog">
+    	 	<div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+		        <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+		      </div>
+
+		      <div class="modal-body container-fluid">
+		      	<form role="form" id="correctiveForm">
+			      	<div class="form-group">
+			          <textarea class="form-control" rows="5" id="description" placeholder="Description of Corrective Action ..."></textarea>
+			        </div>
+
+			        <div class="form-group">
+			          <input type="text" class="form-control" id="reportedBy" placeholder="Action Taken By ...">
+			        </div>
+
+			        <div class="form-group">
+			            <select class="form-control" id="companyReporter">
+			            	<option value="0" selected="selected">Choose company...</option>
+			            	<option>1</option>
+			            	<option>2</option>
+			            	<option>3</option>
+			            </select>
+			          
+			        </div>
+			        
+			        <div class="form-group">
+			            <div class='input-group input-append date form_datetime'>
+		                    <input type='text' class="form-control" id='' placeholder="Date ..." />
+		                    <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
+		                    </span>
+		                </div>
+			        </div>
+				</form>
+		      </div>
+
+		      <div class="modal-footer">
+		        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+		        <button type="button" class="btn btn-primary">Save changes</button>
+		      </div>
+		    </div>
+    	 </div>
+    </div>
+
+  	<!-- Optional: Include the jQuery library -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="vendors/bootstrap/datepicker/js/bootstrap-datetimepicker.js"></script>
+	<script src="vendors/bootstrap/tables/bootstrap-table.js"></script>
+	<!-- Optional: Incorporate the Bootstrap JavaScript plugins -->
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	<!--AngularJS CDN-->
+	<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+    <script src="app/js/index.js"></script>
+  </body>
+</html>
