@@ -35,3 +35,31 @@ label.optional {
 .without-left-border .fixed-table-container tbody td {
 	border-left: none !important;
 }
+
+textarea.ng-invalid.ng-dirty,
+select.ng-invalid.ng-dirty,
+input.ng-invalid.ng-dirty {
+	background-color: #FFB5C5;
+}
+textarea.ng-invalid.ng-dirty option,
+select.ng-invalid.ng-dirty option,
+select.ng-valid.ng-dirty option {
+	background:#fff;
+}
+textarea.ng-invalid.ng-dirty:focus,
+select.ng-invalid.ng-dirty:focus,
+input.ng-invalid.ng-dirty:focus {
+	box-shadow:0 0 5px  #FFB5C5;
+	border-color:#CD919E;
+}
+textarea.ng-valid.ng-dirty,
+select.ng-valid.ng-dirty,
+input.ng-valid.ng-dirty {
+	background-color: #90EE90;
+}
+textarea.ng-valid.ng-dirty:focus,
+select.ng-valid.ng-dirty:focus,
+input.ng-valid.ng-dirty:focus {
+	box-shadow:0 0 5px  #90EE90;
+	border-color:#7CCD7C;
+}

@@ -1,6 +1,62 @@
 ﻿!function() {
 	var app = angular.module('IncidentForm',[]); 
 
+	app.factory('Validator',function(){
+		return {
+			create:function(field,validate) {
+				app.directive(field,function () {
+					var isValid = validate;
+					return {
+						require:'ngModel',
+						link:function (scope, elm, attrs, ngModelCtrl) {
+							ngModelCtrl.$parsers.unshift(function (viewValue) {
+								ngModelCtrl.$setValidity('strongPass', isValid(viewValue));
+								return viewValue;
+							});
+
+							ngModelCtrl.$formatters.unshift(function (modelValue) {
+								ngModelCtrl.$setValidity('strongPass', isValid(modelValue));
+								return modelValue;
+							});
+						}
+					};
+				});
+			}
+		}
+	});
+	
+	var inj = angular.injector(['IncidentForm','ng']);
+	var validator = inj.get('Validator');
+	
+	validator.create('valDate',function(v){
+		var re = /^(0[0-9]|1[0-2])\/([0-2][0-9]|3[0-1])\/(20[1-9][4-9]) (0[0-9]|1[1-2]):([0-5][0-9]) (AM|PM)$/;
+		if(re.test(v)) return true;
+		return false;
+	});
+	
+	validator.create('valName',function(v){
+		var re = /^[A-Za-z\sа-яА-ЯіІїЇҐґ]+$/;
+		if(re.test(v)) return true;
+		return false;
+	});
+	
+	validator.create('valSelect',function(v){
+		if(isNaN(+v)) return true;
+		return false;
+	});
+	
+	validator.create('valPhone',function(v){
+		var re = /^[0-9]{3}.[0-9]{3}.[0-9]{4}$/;
+		if(re.test(v)) return true;
+		return false;
+	});
+	
+	validator.create('valTextarea',function(v){
+		v = encodeURI(v);console.log(v);
+		if(!v) return false;
+		return true;
+	})
+	
 	var ctrls = {
 		generalTab:['$scope','$rootScope',function($scope,$rootScope){
 			$scope.general = {};
@@ -28,6 +84,24 @@
 					})[0];		
 				}
 			};
+			
+			$scope.general.severity = {
+				data:[
+					{severity:'Loss well controll',apply:0},
+					{severity:'Fatality(ies)',apply:0},
+					{severity:'Hospitalization or medical treatment',apply:0},
+					{severity:'Spill offsite > 50 Dbls',apply:0},
+					{severity:'Spill to water, any amount',apply:0},
+					{severity:'Property damage',apply:0}
+				],
+				uncheck:0,
+				resetAll:function(){
+					if(!!this.uncheck)
+						this.data.forEach(function(obj){
+							obj.apply = false;
+						});
+				}
+			}
 		}],
 		tableStyle:['$scope','$window',function($scope, $window){
 			$window.zebraRows = function(row, index) {
