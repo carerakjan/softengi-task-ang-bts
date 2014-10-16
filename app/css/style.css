@@ -41,7 +41,7 @@ select.ng-invalid.ng-dirty,
 input.ng-invalid.ng-dirty {
 	background-color: #FFB5C5;
 }
-textarea.ng-invalid.ng-dirty option,
+
 select.ng-invalid.ng-dirty option,
 select.ng-valid.ng-dirty option {
 	background:#fff;

@@ -10,12 +10,12 @@
 						require:'ngModel',
 						link:function (scope, elm, attrs, ngModelCtrl) {
 							ngModelCtrl.$parsers.unshift(function (viewValue) {
-								ngModelCtrl.$setValidity('strongPass', isValid(viewValue));
+								ngModelCtrl.$setValidity(field, isValid(viewValue));
 								return viewValue;
 							});
 
 							ngModelCtrl.$formatters.unshift(function (modelValue) {
-								ngModelCtrl.$setValidity('strongPass', isValid(modelValue));
+								ngModelCtrl.$setValidity(field, isValid(modelValue));
 								return modelValue;
 							});
 						}
@@ -158,14 +158,25 @@
 				} 
 			};
 
+			$scope.corrective.validateFields = function() {
+				var require = ['dateAct','_companyReporter','takenBy','correctiveDscr'];
+				var valid = true;
+				for(var i=0;i<require.length;++i) {
+					valid = valid && $scope.correctiveForm[require[i]].$valid;
+				}
+				return valid;
+			}
+			
 			$scope.corrective.saveAction = function(){
+				if(!$scope.corrective.validateFields()) return;
+
 				var id = $scope.corrective.ID || generateID();
 
 				$scope.corrective.actions[id] = {
 					id:id,
 					state:false,
 					descrCA:$scope.corrective.descrCA,
-					takenBy:$scope.corrective.takenBy,
+					takenBy:capitalize($scope.corrective.takenBy),
 					company:$scope.corrective.companyReporter.current,
 					date:$scope.corrective.date
 				};
@@ -199,6 +210,14 @@
 
 	function generateID() {
 		return ''+new Date().valueOf()+parseInt(Math.random()*10000000000,10);
+	}
+
+	function capitalize(str) {
+		if (str === undefined) { str = ''; }
+		str = str.replace(/^\s+/,'').replace(/\s+$/,'').replace(/(\s+)/g,' ').split(' ');
+		for(var i=0; i<str.length; ++i)
+			str[i] = str[i].charAt(0).toUpperCase() + str[i].substring(1);
+		return str.join(' ');
 	}
 
 	$(document).ready(function () {
