@@ -29,7 +29,7 @@
 	var validator = inj.get('Validator');
 	
 	validator.create('valDate',function(v){
-		var re = /^(0[0-9]|1[0-2])\/([0-2][0-9]|3[0-1])\/(20[1-9][4-9]) (0[0-9]|1[1-2]):([0-5][0-9]) (AM|PM)$/;
+		var re = /^(0[0-9]|1[0-2])\/([0-2][0-9]|3[0-1])\/(20[1-9][4-9]) (0[0-9]|1[0-2]):([0-5][0-9]) (AM|PM)$/;
 		if(re.test(v)) return true;
 		return false;
 	});
@@ -52,13 +52,13 @@
 	});
 	
 	validator.create('valTextarea',function(v){
-		v = encodeURI(v);console.log(v);
+		v = encodeURI(v);
 		if(!v) return false;
 		return true;
-	})
+	});
 	
 	var ctrls = {
-		generalTab:['$scope','$rootScope',function($scope,$rootScope){
+		generalTab:['$scope',function($scope){
 			$scope.general = {};
 			
 			$scope.general.companyReporter = {
@@ -103,6 +103,82 @@
 				}
 			}
 		}],
+
+		correctiveTab:['$scope','$rootScope',function($scope,$rootScope){
+			$scope.corrective = {};
+			$scope.corrective.actions = {};
+			$scope.corrective.count = 0;
+			$scope.corrective.max = 5;
+
+			$scope.corrective.companyReporter =
+				angular.copy($rootScope.$$childHead.general.companyReporter);
+
+			$scope.corrective.editAction = function(){
+				var action = $('#correctiveActionTb').bootstrapTable('getSelections');
+				if(action.length === 0) return;
+
+				$('#correctiveActionForm').modal('show');
+				action = action[0];
+				
+				$scope.corrective.state='edit';
+				$scope.corrective.ID = action.id;
+				$scope.corrective.descrCA = action.descrCA;
+				$scope.corrective.takenBy = action.takenBy;
+				$scope.corrective.companyReporter.current = action.company;
+				$scope.corrective.date = action.date;
+
+			};
+
+			$scope.corrective.removeAction = function(){
+				var selects = $('#correctiveActionTb').bootstrapTable('getSelections'),
+		            ids = $.map(selects, function (row) { return row.id; });
+		        
+		        if(ids[0] in $scope.corrective.actions)
+		        		delete $scope.corrective.actions[ids[0]]; 
+		        
+		        $('#correctiveActionTb').bootstrapTable('remove',{field:'id',values:ids});
+		        if($scope.corrective.count > 0) --$scope.corrective.count;
+			};
+
+			$scope.corrective.addAction = function(){
+				if($scope.corrective.count >= 5) {
+
+					return;
+				}
+				$scope.corrective.state='add';
+				delete $scope.corrective.ID;
+				$('#correctiveForm')[0].reset();
+				$('#correctiveActionForm').modal('show');
+			};
+
+			$scope.corrective.getTitle = function(){
+				switch($scope.corrective.state){
+					case 'add': return 'Add Action';
+					case 'edit': return 'Edit Action';
+				} 
+			};
+
+			$scope.corrective.saveAction = function(){
+				var id = $scope.corrective.ID || generateID();
+
+				$scope.corrective.actions[id] = {
+					id:id,
+					state:false,
+					descrCA:$scope.corrective.descrCA,
+					takenBy:$scope.corrective.takenBy,
+					company:$scope.corrective.companyReporter.current,
+					date:$scope.corrective.date
+				};
+
+				var actions = [];
+				angular.forEach($scope.corrective.actions,function(value){ this.push(value); },actions);
+				$scope.corrective.count = actions.length;
+				$('#correctiveActionTb').bootstrapTable('load',actions);
+
+				$('#correctiveActionForm').modal('hide');
+			};
+		}],
+
 		tableStyle:['$scope','$window',function($scope, $window){
 			$window.zebraRows = function(row, index) {
 			    if (index % 2 === 0) {
@@ -121,6 +197,9 @@
 		app.controller(i,ctrls[i]);	
 
 
+	function generateID() {
+		return ''+new Date().valueOf()+parseInt(Math.random()*10000000000,10);
+	}
 
 	$(document).ready(function () {
 	    $(".form_datetime").datetimepicker({
@@ -135,73 +214,6 @@
 		  e.preventDefault()
 		  $(this).tab('show')
 		});
-
-
-		$('#corrective .btn-danger').click(function () {
-	        var selects = $('#correctiveActionTb').bootstrapTable('getSelections'),
-	            ids = $.map(selects, function (row) {
-	                console.log(row);
-	                return row.id;
-	            });
-
-	        $('#correctiveActionTb').bootstrapTable('remove', {
-	            field: 'id',
-	            values: ids
-	        });
-	    });
-
-		$('#corrective .btn-info').click(function(){
-			var select = $('#correctiveActionTb').bootstrapTable('getSelections');
-			if(select.length > 0) $('#correctiveActionForm').modal();
-
-		});
-
-
-		$('#corrective .btn-primary').click(function(){
-			$('#correctiveForm')[0].reset();
-			$('#correctiveActionForm').modal();
-		});
-
-		//$('#correctiveActionTb').bootstrapTable('getData');
-		//$('#correctiveActionTb').bootstrapTable('getSelections');
-	    
-		function generateID() {
-			return ''+new Date().valueOf()+parseInt(Math.random()*10000000000,10);
-		}
-
-		$('#correctiveActionTb').bootstrapTable('append',[
-			{
-				id:generateID(),
-				state:false,
-				descrCA:'erlkgjlkerger',
-				takenBy:'Joe',
-				company:'Delta',
-				date:'12/12/14'
-			},
-			{
-				id:generateID(),
-				state:false,
-				descrCA:'erlkgjlkerger',
-				takenBy:'Joe',
-				company:'Delta',
-				date:'12/12/14'
-			}
-		]);
-
-		$.each([$('#correctiveReviewTb'),$('#generalReviewTb')],function(){
-			this.bootstrapTable('append',function(){
-				var arr = [];
-				for(var i=0; i<10; ++i) {
-					arr.push({
-						id:generateID(),
-						name:'fdgdfg',
-						value:'fdlgjfdlkgjfdlkjglfdjg'
-					});
-				}
-				return arr;
-				
-			}());
-		});	
 
 		$('#correctiveActionTb').bootstrapTable().on('click-row.bs.table', function (e, row, $element) {
 			$element.find('.bs-checkbox input:radio').click();
