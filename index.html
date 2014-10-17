@@ -73,7 +73,7 @@
 				        <div class="form-group">
 				          <label class="optional control-label col-sm-4" for="supervisorName">Supervisor Name:</label>
 				          <div class="col-sm-8">          
-				             <input val-name type="text" class="form-control text-capitalize" name="supervisorName" ng-model="general.supervisorName" id="supervisorName">
+				             <input val-name-not-req type="text" class="form-control text-capitalize" name="supervisorName" ng-model="general.supervisorName" id="supervisorName">
 				          </div>
 				        </div>
 				        <div class="form-group">
@@ -118,9 +118,9 @@
 				          <label class="control-label col-sm-4" for="checkSeverity">* Incident Severity (Check all that Apply):</label>
 				          <div class="col-sm-8">          
 				             <div class="check-group col-sm-12 input-group">
-				             	<div ng-repeat="sv in general.severity.data" class="checkbox"><label class="col-sm-12"><input type="checkbox" name="severities[]" ng-model="sv.apply"> {{sv.severity}}</label></div>
+				             	<div ng-repeat="sv in general.severity.data" class="checkbox"><label class="col-sm-12"><input type="checkbox" name="severities" ng-model="sv.apply"> {{sv.severity}}</label></div>
 				             	<div class="with-border-top checkbox"><label class="col-sm-12">
-									<input type="checkbox" ng-model="general.severity.uncheck" ng-required="general.severity.resetAll()"> None Apply</label>
+									<input type="checkbox" ng-model="general.severity.uncheck" name="severities" ng-required="general.severity.resetAll()"> None Apply</label>
 								</div>
 				             </div>
 				          </div>
@@ -137,7 +137,7 @@
 	  			<p class="block-info col-sm-offset-1 col-sm-10" role="alert"><span class="glyphicon glyphicon-warning-sign"></span>Please complete the table below.</p>
 	  		</div>
 	  		<div class="row">
-	  			<h4 class="col-sm-6 col-xs-6">Immediate Corrective Action(s) <span class="badge">{{corrective.count}} of {{corrective.max}} available</span></h4>
+	  			<h4 class="col-sm-6 col-xs-6">Immediate Corrective Action(s) <span class="badge action-count">{{corrective.count}} of {{corrective.max}} available</span></h4>
 	  			<div class="col-sm-6 col-xs-6 text-right">
 	  				<a class="btn btn-sm btn-primary" ng-click="corrective.addAction()"><span class="glyphicon glyphicon-plus-sign"></span> add action</a>
 	  				<a class="btn btn-sm btn-danger" ng-click="corrective.removeAction()"><span class="glyphicon glyphicon-remove"></span> remove</a>
@@ -171,7 +171,7 @@
 				      </div>
 
 				      <div class="modal-body container-fluid">
-				      	<form role="form"  name="correctiveForm" id="correctiveForm">
+				      	<form role="form"  name="correctiveForm" class="form" id="correctiveForm">
 					      	<div class="form-group">
 					            <div class='input-group input-append date form_datetime'>
 				                    <input val-date ng-model="corrective.date" type='text' class="form-control" name="dateAct" id='dateAct' placeholder="Date ..." />
@@ -208,34 +208,47 @@
   	
   		<!--Rewiew and Submit Tab-->
 
-	  	<div class="tab-pane fade" id="submit">	
+	  	<div class="tab-pane fade" id="submit" ng-controller="submitTab">	
 	  		<div class="row">
 	  			<p class="block-info col-sm-offset-1 col-sm-9 col-xs-8"><span class="glyphicon glyphicon-warning-sign"></span> Please complete the below based on available information. Click on applicable tabs above to enter additional information related to the incident. When complete click '<span class="text-uppecase">Review</span> and <span class="text-uppercase">Submit</span>' tab above.</p>
-	  			<p class="block-info col-sm-2 col-xs-4 text-center"><a class="btn btn-success disabled"><span class="glyphicon glyphicon-ok"></span> Submit</a></p>
+	  			<p class="block-info col-sm-2 col-xs-4 text-center"><a class="btn btn-success {{(genForm.$valid)?'':'disabled'}}"><span class="glyphicon glyphicon-ok"></span> Submit</a></p>
 	  		</div>
 	  		<h4 class="row">General Information:</h4>
 	  		<div class="with-table row">
-	  			<div class="table-responsive without-left-border" ng-controller="tableStyle">{{zebra('active')}}
-				  	<table id="generalReviewTb" data-toggle="table" data-show-header="false" data-row-style="zebraRows">
+	  			<div class="table-responsive without-left-border">
+	  				<table id="generalReviewTb" data-toggle="table" data-show-header="false" data-row-style="colorfulRows">
 				  		<thead>
 						    <tr>
 						        <th data-field="name" data-align="right">Name</th>
 						        <th data-field="value">Value</th>
 						    </tr>
-					    </thead>
+						</thead>
+						<tbody>
+							<tr><td><b>Date and Time of Incident:</b></td><td><span ng-bind-html="getRequireFildValue('dateIncident') | trustedHTML"></span></td></tr>
+							<tr><td><b>Reported By:</b></td><td><span ng-bind-html="getRequireFildValue('reportedBy') | trustedHTML"></span></td></tr>
+							<tr><td><b>Company of Reporter:</b></td><td><span ng-bind-html="getRequireFildValue('companyReporter') | trustedHTML"></span></td></tr>
+							<tr><td><b>Contact Number:</b></td><td><span ng-bind-html="getRequireFildValue('contactNumber') | trustedHTML"></span></td></tr>
+							<tr><td><b>Supervisor Name:</b></td><td><span ng-bind-html="getRequireFildValue('supervisorName') | trustedHTML"></span></td></tr>
+							<tr><td><b>High Level Description of Incident:</b></td><td><span ng-bind-html="getRequireFildValue('description') | trustedHTML"></span></td></tr>
+							<tr><td><b>Well Number:</b></td><td><span ng-bind-html="getRequireFildValue('wellNumber') | trustedHTML"></span></td></tr>
+							<tr><td><b>Region:</b></td><td><span ng-bind-html="genForm.region.$viewValue | trustedHTML"></span></td></tr>
+							<tr><td><b>State:</b></td><td><span ng-bind-html="genForm.state.$viewValue | trustedHTML"></span></td></tr>
+							<tr><td><b>Field Office:</b></td><td><span ng-bind-html="genForm.fieldOffice.$viewValue | trustedHTML"></span></td></tr>
+							<!-- <tr><td><b>Incident Severity:</b></td><td><span ng-bind-html="genForm.severities.$viewValue | trustedHTML"></span></td></tr> -->
+						</tbody>
 				  	</table>
 				</div>
 	  		</div>
 	  		<h4 class="row">Immediate Corrective Action(s):</h4>
 	  		<div class="with-table row">
-	  			<div class="table-responsive without-left-border" ng-controller="tableStyle">
-	  				<table id="correctiveReviewTb" data-toggle="table" data-show-header="false" data-row-style="zebraRows">
+	  			<div class="table-responsive without-left-border">
+	  				<table id="correctiveReviewTb" data-toggle="table" data-show-header="false" data-row-style="colorfulRows">
 				  		<thead>
 						    <tr>
 						        <th data-field="name" data-align="right">Name</th>
 						        <th data-field="value">Value</th>
 						    </tr>
-					    </thead>
+						</thead>
 				  	</table>
 				</div>
 	  		</div>

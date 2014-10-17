@@ -10,12 +10,12 @@
 						require:'ngModel',
 						link:function (scope, elm, attrs, ngModelCtrl) {
 							ngModelCtrl.$parsers.unshift(function (viewValue) {
-								ngModelCtrl.$setValidity(field, isValid(viewValue));
+								ngModelCtrl.$setValidity('incidentFld', isValid(viewValue));
 								return viewValue;
 							});
 
 							ngModelCtrl.$formatters.unshift(function (modelValue) {
-								ngModelCtrl.$setValidity(field, isValid(modelValue));
+								ngModelCtrl.$setValidity('incidentFld', isValid(modelValue));
 								return modelValue;
 							});
 						}
@@ -25,42 +25,55 @@
 		}
 	});
 	
+
+
 	var inj = angular.injector(['IncidentForm','ng']);
 	var validator = inj.get('Validator');
 	
+	app.filter('trustedHTML', ['$sce', function($sce){
+        return function(text) {
+            return $sce.trustAsHtml(text);
+        };
+    }]);
+
 	validator.create('valDate',function(v){
-		var re = /^(0[0-9]|1[0-2])\/([0-2][0-9]|3[0-1])\/(20[1-9][4-9]) (0[0-9]|1[0-2]):([0-5][0-9]) (AM|PM)$/;
-		if(re.test(v)) return true;
-		return false;
+			var re = /^(0[0-9]|1[0-2])\/([0-2][0-9]|3[0-1])\/(20[1-9][4-9]) (0[0-9]|1[0-2]):([0-5][0-9]) (AM|PM)$/;
+			return re.test(v+'');
 	});
 	
 	validator.create('valName',function(v){
 		var re = /^[A-Za-z\sа-яА-ЯіІїЇҐґ]+$/;
-		if(re.test(v)) return true;
-		return false;
+		if(v === undefined) v = '';
+		return re.test(v+'');
+	});
+
+	validator.create('valNameNotReq',function(v){
+		var re = /^[A-Za-z\sа-яА-ЯіІїЇҐґ]+$/;
+		if(v === undefined || v === '') return true;
+		return re.test(v+'');
 	});
 	
 	validator.create('valSelect',function(v){
-		if(isNaN(+v)) return true;
-		return false;
+		switch(typeof v) {
+			case 'undefined': return isNaN(+!!v);
+			case 'string': return isNaN(+v);
+			case 'default': return isNaN(v);
+		}
 	});
 	
 	validator.create('valPhone',function(v){
 		var re = /^[0-9]{3}.[0-9]{3}.[0-9]{4}$/;
-		if(re.test(v)) return true;
-		return false;
+		return re.test(v+'');
 	});
 	
 	validator.create('valTextarea',function(v){
-		v = encodeURI(v);
-		if(!v) return false;
-		return true;
+		if(v === undefined) v = '';
+		return !!encodeURI(v);
 	});
 	
 	var ctrls = {
 		generalTab:['$scope',function($scope){
 			$scope.general = {};
-			
 			$scope.general.companyReporter = {
 				current:'0',
 				data:[
@@ -104,7 +117,7 @@
 			}
 		}],
 
-		correctiveTab:['$scope','$rootScope',function($scope,$rootScope){
+		correctiveTab:['$scope','$rootScope','$compile',function($scope,$rootScope,$compile){
 			$scope.corrective = {};
 			$scope.corrective.actions = {};
 			$scope.corrective.count = 0;
@@ -130,6 +143,8 @@
 			};
 
 			$scope.corrective.removeAction = function(){
+				if(!confirm('Are you sure you want to delete the action?')) return;
+
 				var selects = $('#correctiveActionTb').bootstrapTable('getSelections'),
 		            ids = $.map(selects, function (row) { return row.id; });
 		        
@@ -138,17 +153,39 @@
 		        
 		        $('#correctiveActionTb').bootstrapTable('remove',{field:'id',values:ids});
 		        if($scope.corrective.count > 0) --$scope.corrective.count;
+		        if($scope.corrective.count < $scope.corrective.max) remBadgeAlert();
 			};
 
-			$scope.corrective.addAction = function(){
-				if($scope.corrective.count >= 5) {
+			function addBadgeAlert(){
+				var b = $('.action-count');
+				if(!b.hasClass('alert-danger'))
+					b.addClass('alert-danger');
+			}
 
-					return;
-				}
+			function remBadgeAlert(){
+				var b = $('.action-count');
+				if(b.hasClass('alert-danger'))
+					b.removeClass('alert-danger');
+			}
+
+			$scope.corrective.addAction = function(){
+				if($scope.corrective.count >= $scope.corrective.max) return;
+				remBadgeAlert();
+				$scope.corrective.resetForm();
 				$scope.corrective.state='add';
-				delete $scope.corrective.ID;
-				$('#correctiveForm')[0].reset();
 				$('#correctiveActionForm').modal('show');
+			};
+
+			$scope.corrective.resetForm = function(){
+			    delete $scope.corrective.ID;
+			   	delete $scope.corrective.descrCA;
+				delete $scope.corrective.takenBy;
+				$scope.corrective.companyReporter.current = '0';
+				delete $scope.corrective.date;
+			    
+				$('#correctiveForm').empty()
+			    	.append($compile(cacheCorrectiveForm)($scope));
+			    initialDTP();	
 			};
 
 			$scope.corrective.getTitle = function(){
@@ -158,17 +195,9 @@
 				} 
 			};
 
-			$scope.corrective.validateFields = function() {
-				var require = ['dateAct','_companyReporter','takenBy','correctiveDscr'];
-				var valid = true;
-				for(var i=0;i<require.length;++i) {
-					valid = valid && $scope.correctiveForm[require[i]].$valid;
-				}
-				return valid;
-			}
-			
+			var require = ['dateAct','_companyReporter','takenBy','correctiveDscr'];
 			$scope.corrective.saveAction = function(){
-				if(!$scope.corrective.validateFields()) return;
+				if(invalidateFields.call($scope,'correctiveForm',require)) return;
 
 				var id = $scope.corrective.ID || generateID();
 
@@ -184,29 +213,54 @@
 				var actions = [];
 				angular.forEach($scope.corrective.actions,function(value){ this.push(value); },actions);
 				$scope.corrective.count = actions.length;
+				addToRewiev(actions);
+				if($scope.corrective.count >= $scope.corrective.max) addBadgeAlert();
 				$('#correctiveActionTb').bootstrapTable('load',actions);
-
 				$('#correctiveActionForm').modal('hide');
 			};
+
+			function addToRewiev(arr) {
+				var names = {
+					descrCA:'Description of Corrective Action',
+					takenBy:'Action Taken By',
+					company:'Company',
+					date:'Date'
+				};
+				var newArr = [];
+				for(var i=0; i<arr.length; ++i) {
+					for(var j in arr[i]) {
+						if(!(j in names)) continue;
+						newArr.push({
+							name:'<b>'+names[j]+' ('+(i+1)+'):</b>',
+							value:arr[i][j]
+						})
+					}
+				}
+				$('#correctiveReviewTb').bootstrapTable('load',newArr);
+			}
 		}],
 
-		tableStyle:['$scope','$window',function($scope, $window){
-			$window.zebraRows = function(row, index) {
-			    if (index % 2 === 0) {
-			        return {classes: arguments.callee.cls};
-			    }
-			    return {};
+		submitTab:['$scope','$rootScope','$window',function($scope, $rootScope,$window){
+			$scope.genForm = $rootScope.$$childHead.genForm;
+			$scope.getRequireFildValue = function(field) {
+				var html = "";
+				if(field in $scope.genForm
+					&& $scope.genForm[field].$valid)
+						html = $scope.genForm[field].$viewValue;
+				else html = '<span class="text-danger">The field is required.</span>';
+				return html;
 			};
-			
-			$scope.zebra = function(cls){
-				$window.zebraRows.cls = cls;
-			};	
 		}]
 	};
 	
 	for(var i in ctrls)
 		app.controller(i,ctrls[i]);	
 
+	function invalidateFields(frm, require) {
+		for(var i=0;i<require.length;++i) {
+			if(this[frm][require[i]].$error.incidentFld) return true;
+		}
+	}
 
 	function generateID() {
 		return ''+new Date().valueOf()+parseInt(Math.random()*10000000000,10);
@@ -220,15 +274,25 @@
 		return str.join(' ');
 	}
 
-	$(document).ready(function () {
-	    $(".form_datetime").datetimepicker({
+	var cacheCorrectiveForm = $('#correctiveForm').html();
+
+	function initialDTP() {
+		$(".form_datetime").datetimepicker({
 			format: "mm/dd/yyyy HH:ii P",
 			showMeridian: true,
 			autoclose: true,
 			todayBtn: true
 		});
+	}
 
-		
+	window.colorfulRows = function(row, index) {
+	    if (index % 2 === 0) {
+	        return {classes:'active'};
+	    }
+	    return {};
+	};
+
+	$(document).ready(function () {
 		$('#incFormTabs a').click(function (e) {
 		  e.preventDefault()
 		  $(this).tab('show')
@@ -237,6 +301,8 @@
 		$('#correctiveActionTb').bootstrapTable().on('click-row.bs.table', function (e, row, $element) {
 			$element.find('.bs-checkbox input:radio').click();
 		});
-		
+
+		initialDTP();
 	});
+
 }();
