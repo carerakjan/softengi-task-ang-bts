@@ -118,10 +118,13 @@
 				          <label class="control-label col-sm-4" for="checkSeverity">* Incident Severity (Check all that Apply):</label>
 				          <div class="col-sm-8">          
 				             <div class="check-group col-sm-12 input-group">
-				             	<div ng-repeat="sv in general.severity.data" class="checkbox"><label class="col-sm-12"><input type="checkbox" name="severities" ng-model="sv.apply"> {{sv.severity}}</label></div>
-				             	<div class="with-border-top checkbox"><label class="col-sm-12">
-									<input type="checkbox" ng-model="general.severity.uncheck" name="severities" ng-required="general.severity.resetAll()"> None Apply</label>
-								</div>
+				             	<div ng-repeat="sv in general.severity.data"
+				             		class="checkbox {{(sv.severity == 'None Apply')?'with-border-top':''}}"><label class="col-sm-12">
+				             		<input type="checkbox" name="severities" value="{{sv.severity}}" 
+				             			ng-model="general.severity.data[$index].apply"
+				             			ng-required="!general.severity.atLeastOneSelected()"
+				             			ng-click="general.severity.fire(sv.severity)"> {{sv.severity}}</label>
+				             	</div>
 				             </div>
 				          </div>
 				        </div>
@@ -234,7 +237,9 @@
 							<tr><td><b>Region:</b></td><td><span ng-bind-html="genForm.region.$viewValue | trustedHTML"></span></td></tr>
 							<tr><td><b>State:</b></td><td><span ng-bind-html="genForm.state.$viewValue | trustedHTML"></span></td></tr>
 							<tr><td><b>Field Office:</b></td><td><span ng-bind-html="genForm.fieldOffice.$viewValue | trustedHTML"></span></td></tr>
-							<!-- <tr><td><b>Incident Severity:</b></td><td><span ng-bind-html="genForm.severities.$viewValue | trustedHTML"></span></td></tr> -->
+							<tr><td><b>Incident Severity:</b></td><td><span
+								ng-bind-html="'<span class=text-danger>The field is required.</span>' | trustedHTML">
+							</span></td></tr>
 						</tbody>
 				  	</table>
 				</div>

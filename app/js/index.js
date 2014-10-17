@@ -10,12 +10,12 @@
 						require:'ngModel',
 						link:function (scope, elm, attrs, ngModelCtrl) {
 							ngModelCtrl.$parsers.unshift(function (viewValue) {
-								ngModelCtrl.$setValidity('incidentFld', isValid(viewValue));
+								ngModelCtrl.$setValidity('incidentFld', isValid(viewValue,scope, elm, attrs));
 								return viewValue;
 							});
 
 							ngModelCtrl.$formatters.unshift(function (modelValue) {
-								ngModelCtrl.$setValidity('incidentFld', isValid(modelValue));
+								ngModelCtrl.$setValidity('incidentFld', isValid(modelValue,scope, elm, attrs));
 								return modelValue;
 							});
 						}
@@ -99,20 +99,49 @@
 			};
 			
 			$scope.general.severity = {
-				data:[
-					{severity:'Loss well controll',apply:0},
-					{severity:'Fatality(ies)',apply:0},
-					{severity:'Hospitalization or medical treatment',apply:0},
-					{severity:'Spill offsite > 50 Dbls',apply:0},
-					{severity:'Spill to water, any amount',apply:0},
-					{severity:'Property damage',apply:0}
+				data: [
+					{severity:'Loss well controll',apply:false},
+					{severity:'Fatality(ies)',apply:false},
+					{severity:'Hospitalization or medical treatment',apply:false},
+					{severity:'Spill offsite > 50 Dbls',apply:false},
+					{severity:'Spill to water, any amount',apply:false},
+					{severity:'Property damage',apply:false},
+					{severity:'None Apply',apply:false}
 				],
-				uncheck:0,
-				resetAll:function(){
-					if(!!this.uncheck)
-						this.data.forEach(function(obj){
-							obj.apply = false;
-						});
+				rewievs:[],
+				fire:function(sv){
+					var m = ['addToRewiev','checkAndReset'];
+					var t = this;
+					m.forEach(function(v) { t[v](sv); });
+				},
+				addToRewiev:function(sv){
+					var t = this;
+					this.data.forEach(function(obj) {
+						if(obj.severity == sv && obj.apply == true)
+							t.rewievs.push(sv);
+					});
+				},
+				checkAndReset:function(sv){
+					this.resetAllExcept({'None Apply':1, reverse:function(){
+						return (sv == 'None Apply')?false:true;
+					}()});
+				},
+				resetAllExcept:function(param){
+					this.data.forEach(function(obj) {
+						if(param.reverse) {
+							if(obj.severity in param) obj.apply = false;
+							return;
+						}
+
+						if(obj.severity in param) return;
+						obj.apply = false;
+					});
+				},
+				atLeastOneSelected: function () {
+					var t = this;
+					return Object.keys(t.data).some(function (k) {
+						return t.data[k].apply;
+					});
 				}
 			}
 		}],
@@ -244,6 +273,9 @@
 
 		submitTab:['$scope','$rootScope','$window',function($scope, $rootScope,$window){
 			$scope.genForm = $rootScope.$$childHead.genForm;
+			
+			$scope.severitiesRewies = $rootScope.$$childHead.general.severity.rewievs;
+			
 			$scope.getRequireFildValue = function(field) {
 				var html = "";
 				if(field in $scope.genForm
