@@ -143,11 +143,13 @@
 			};
 
 			$scope.corrective.removeAction = function(){
-				if(!confirm('Are you sure you want to delete the action?')) return;
-
+				
 				var selects = $('#correctiveActionTb').bootstrapTable('getSelections'),
 		            ids = $.map(selects, function (row) { return row.id; });
 		        
+		        if(ids.length === 0) return;
+				if(!confirm('Are you sure you want to delete the action?')) return;
+
 		        if(ids[0] in $scope.corrective.actions)
 		        		delete $scope.corrective.actions[ids[0]]; 
 		        
