@@ -52,7 +52,7 @@
 				        <div class="form-group">
 				          <label class="control-label col-sm-4" for="reportedBy">* Reported By:</label>
 				          <div class="col-sm-8">          
-				            <input val-name type="text" class="form-control text-capitalize" name="reportedBy" id="reportedBy" required ng-model="general.reportedBy" placeholder="Your Name">
+				            <input val-name type="text" class="form-control text-capitalize" name="reportedBy" id="reportedBy" required ng-model="general.reportedBy" ng-change="general.capitalize('reportedBy',general.reportedBy)"  placeholder="Your Name">
 				          </div>
 				        </div>
 				        <div class="form-group">
@@ -73,7 +73,7 @@
 				        <div class="form-group">
 				          <label class="optional control-label col-sm-4" for="supervisorName">Supervisor Name:</label>
 				          <div class="col-sm-8">          
-				             <input val-name-not-req type="text" class="form-control text-capitalize" name="supervisorName" ng-model="general.supervisorName" id="supervisorName">
+				             <input val-name-not-req type="text" class="form-control text-capitalize" name="supervisorName" ng-model="general.supervisorName" ng-change="general.capitalize('supervisorName',general.supervisorName)" id="supervisorName">
 				          </div>
 				        </div>
 				        <div class="form-group">

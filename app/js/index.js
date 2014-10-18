@@ -98,6 +98,11 @@
 				}
 			};
 			
+			$scope.general.capitalize = function(field,value) {
+				if(field in $scope.general)
+					$scope.general[field] = capitalize(value);
+			}
+
 			$scope.general.severity = {
 				data: [
 					{severity:'Loss well controll',apply:false},
