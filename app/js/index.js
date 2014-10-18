@@ -185,6 +185,11 @@
 		        $('#correctiveActionTb').bootstrapTable('remove',{field:'id',values:ids});
 		        if($scope.corrective.count > 0) --$scope.corrective.count;
 		        if($scope.corrective.count < $scope.corrective.max) remBadgeAlert();
+
+		        var actions = [];
+				angular.forEach($scope.corrective.actions,function(value){ this.push(value); },actions);
+				$scope.corrective.count = actions.length;
+				addToRewiev(actions);
 			};
 
 			function addBadgeAlert(){
