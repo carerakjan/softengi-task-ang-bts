@@ -62,7 +62,7 @@
 	});
 	
 	validator.create('valPhone',function(v){
-		var re = /^[0-9]{3}.[0-9]{3}.[0-9]{4}$/;
+		var re = /^([0-9]{3})\.([0-9]{3})\.([0-9]{4})$/;
 		return re.test(v+'');
 	});
 	
@@ -115,15 +115,15 @@
 				],
 				rewievs:[],
 				fire:function(sv){
-					var m = ['addToRewiev','checkAndReset'];
+					var m = ['checkAndReset','applied'];
 					var t = this;
 					m.forEach(function(v) { t[v](sv); });
 				},
-				addToRewiev:function(sv){
+				applied:function(){
 					var t = this;
-					this.data.forEach(function(obj) {
-						if(obj.severity == sv && obj.apply == true)
-							t.rewievs.push(sv);
+					t.rewievs = [];
+					t.data.forEach(function(o){
+						if(o.apply) t.rewievs.push(o.severity);
 					});
 				},
 				checkAndReset:function(sv){
@@ -290,7 +290,7 @@
 			});
 
 			$scope.genForm = $rootScope.$$childHead.genForm;
-			$scope.severitiesRewies = $rootScope.$$childHead.general.severity.rewievs;
+			$scope.severity = $rootScope.$$childHead.general.severity;
 			$scope.report = new Report();
 
 			var generalFlds = {
@@ -306,15 +306,26 @@
 				'Field Office':'fieldOffice'
 			};
 
+			function convertDate(d) {
+				return dateFormat(new Date(d).valueOf(),
+					'#YY#-#MM#-#DD#T#hh#:#mm#:#ss#');
+			}
+
 			$scope.submit = function(){
 				$scope.report.clear();
 				Object.keys(generalFlds).some(function(k){
-					$scope.report.push({name:k,values:[$scope.genForm[generalFlds[k]].$viewValue]});
+					var v = $scope.genForm[generalFlds[k]].$viewValue;
+					if(generalFlds[k] == 'dateIncident') v = convertDate(v);
+					$scope.report.push({name:k,values:[v]});
 				});
+
+				$scope.report.push({name:'Incident Severity (Check all that Apply)',
+						values:$scope.severity.rewievs.filter(function(v){return (!!1);})});
 
 				var correctFlds = $('#correctiveReviewTb').bootstrapTable('getData');
 				correctFlds.forEach(function(obj){
-					$scope.report.push({name:$(obj.name).text(),values:[obj.value]});
+					var v = obj.value; if(/date/i.test(obj.name)) v = convertDate(v);
+					$scope.report.push({name:$(obj.name).text(),values:[v]});
 				});
 
 				$scope.reportWin = $window.open('report.html','_blank','');

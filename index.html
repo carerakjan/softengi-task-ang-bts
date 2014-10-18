@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	
+	<title>Incident Form</title>
 	<!-- Latest compiled and minified CSS -->
 	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
 	<link rel="stylesheet" href="app/css/style.css">
@@ -123,7 +123,7 @@
 				             		<input type="checkbox" name="severities" value="{{sv.severity}}" 
 				             			ng-model="general.severity.data[$index].apply"
 				             			ng-required="!general.severity.atLeastOneSelected()"
-				             			ng-click="general.severity.fire(sv.severity)"> {{sv.severity}}</label>
+				             			ng-change="general.severity.fire(sv.severity)"> {{sv.severity}}</label>
 				             	</div>
 				             </div>
 				          </div>
@@ -238,8 +238,7 @@
 							<tr><td><b>Region:</b></td><td><span ng-bind-html="genForm.region.$viewValue | trustedHTML"></span></td></tr>
 							<tr><td><b>State:</b></td><td><span ng-bind-html="genForm.state.$viewValue | trustedHTML"></span></td></tr>
 							<tr><td><b>Field Office:</b></td><td><span ng-bind-html="genForm.fieldOffice.$viewValue | trustedHTML"></span></td></tr>
-							<tr><td><b>Incident Severity:</b></td><td><span
-								ng-bind-html="'<span class=text-danger>The field is required.</span>' | trustedHTML">
+							<tr><td><b>Incident Severity:</b></td><td><span ng-bind-html="(severity.rewievs.length>0)?severity.rewievs.join(', '):'<span class=text-danger>The field is required.</span>' | trustedHTML">
 							</span></td></tr>
 						</tbody>
 				  	</table>
