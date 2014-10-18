@@ -293,7 +293,30 @@
 			$scope.severitiesRewies = $rootScope.$$childHead.general.severity.rewievs;
 			$scope.report = new Report();
 
+			var generalFlds = {
+				'Date and Time of Incident':'dateIncident',
+				'Reported By':'reportedBy',
+				'Company of Reporter':'companyReporter',
+				'Contact Number':'contactNumber',
+				'Supervisor Name':'supervisorName',
+				'High Level Description of Incident':'description',
+				'Well Number':'wellNumber',
+				'Region':'region',
+				'State':'state',
+				'Field Office':'fieldOffice'
+			};
+
 			$scope.submit = function(){
+				$scope.report.clear();
+				Object.keys(generalFlds).some(function(k){
+					$scope.report.push({name:k,values:[$scope.genForm[generalFlds[k]].$viewValue]});
+				});
+
+				var correctFlds = $('#correctiveReviewTb').bootstrapTable('getData');
+				correctFlds.forEach(function(obj){
+					$scope.report.push({name:$(obj.name).text(),values:[obj.value]});
+				});
+
 				$scope.reportWin = $window.open('report.html','_blank','');
 			};
 
@@ -326,11 +349,13 @@
 				}
 			}
 		}();
+		this.clear = function() {
+			this.default.workflowStepUpdateInformation.fields = [];
+		};
 		this.push = function(source) {
 			this.default.workflowStepUpdateInformation.fields.push(source);	
 		};
 		this.send = function(to){
-			console.log(to);
 			if(to && to.postMessage)
 				to.postMessage(angular.toJson(this.default,true),'*');
 		}

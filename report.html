@@ -16,10 +16,10 @@
 		$(window).on('message',function(e){
 			var d = e.data || e.originalEvent.data || window.event.data;
 			if($.type(d) === 'string') {
-				$('#data').html(d);
+				$('#data').empty().html(d);
 			} else if($.type(d) === 'object') {
 				JSON.stringfy(d,true);
-				$('#data').html(d);
+				$('#data').empty().html(d);
 			} 
 		})
 	</script>
