@@ -1,0 +1,27 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+  </head>
+  <body>
+	<pre id="data"></pre>	
+  	<!-- Optional: Include the jQuery library -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script>
+		$(document).ready(function(){
+			var opener = window.opener||window.parent||window;
+			opener.postMessage('DOMContentLoaded','*');
+		});
+		$(window).on('message',function(e){
+			var d = e.data || e.originalEvent.data || window.event.data;
+			if($.type(d) === 'string') {
+				$('#data').html(d);
+			} else if($.type(d) === 'object') {
+				JSON.stringfy(d,true);
+				$('#data').html(d);
+			} 
+		})
+	</script>
+  </body>
+</html>

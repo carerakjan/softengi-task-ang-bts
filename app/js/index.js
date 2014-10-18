@@ -282,10 +282,21 @@
 		}],
 
 		submitTab:['$scope','$rootScope','$window',function($scope, $rootScope,$window){
+			$(window).on('message',function(e){
+				var d = e.data || e.originalEvent.data || window.event.data;
+				if(d == 'DOMContentLoaded') {
+					$scope.report.send($scope.reportWin); 
+				}
+			});
+
 			$scope.genForm = $rootScope.$$childHead.genForm;
-			
 			$scope.severitiesRewies = $rootScope.$$childHead.general.severity.rewievs;
-			
+			$scope.report = new Report();
+
+			$scope.submit = function(){
+				$scope.reportWin = $window.open('report.html','_blank','');
+			};
+
 			$scope.getRequireFildValue = function(field) {
 				var html = "";
 				if(field in $scope.genForm
@@ -294,11 +305,36 @@
 				else html = '<span class="text-danger">The field is required.</span>';
 				return html;
 			};
+
+			
 		}]
 	};
 	
 	for(var i in ctrls)
 		app.controller(i,ctrls[i]);	
+
+	function Report() {
+		this.default = function() {
+			return {
+				workflowCreationInformation:{
+					workflowTypeName:'Incident Report',
+					name:'Report - ' + dateFormat(new Date().valueOf(),'#YY#.#MM#.#DD#')
+				},
+				workflowStepUpdateInformation:{
+					stepIdOrName:'Initial Step',
+					fields:[]
+				}
+			}
+		}();
+		this.push = function(source) {
+			this.default.workflowStepUpdateInformation.fields.push(source);	
+		};
+		this.send = function(to){
+			console.log(to);
+			if(to && to.postMessage)
+				to.postMessage(angular.toJson(this.default,true),'*');
+		}
+	};
 
 	function invalidateFields(frm, require) {
 		for(var i=0;i<require.length;++i) {
@@ -317,6 +353,37 @@
 			str[i] = str[i].charAt(0).toUpperCase() + str[i].substring(1);
 		return str.join(' ');
 	}
+
+	function dateFormat(di,tmp){
+		//#hh# #mm# #ss# #DD# #MM# #YY# #yy#
+		var _d = parseInt(di,10);
+		if(isNaN(_d)) return di;
+		_d = new Date(_d);
+		var buf = tmp;
+		var toStr = function(val){
+			var _v = parseInt(val,10);
+			if(isNaN(_v)) return "00";
+			if(_v < 10) return "0"+_v;
+			return _v;
+		};
+		var _do = {
+			hh:toStr(_d.getHours()),
+			mm:toStr(_d.getMinutes()),
+			ss:toStr(_d.getSeconds()),
+			DD:toStr(_d.getDate()),
+			MM:toStr(_d.getMonth()+1),
+			YY:_d.getFullYear(),
+			yy:toStr(_d.getFullYear()%100)
+		}
+		if(/#hh#/g.test(tmp)) buf = buf.replace(/#hh#/g,_do.hh);
+		if(/#mm#/g.test(tmp)) buf = buf.replace(/#mm#/g,_do.mm);
+		if(/#ss#/g.test(tmp)) buf = buf.replace(/#ss#/g,_do.ss);
+		if(/#DD#/g.test(tmp)) buf = buf.replace(/#DD#/g,_do.DD);
+		if(/#MM#/g.test(tmp)) buf = buf.replace(/#MM#/g,_do.MM);
+		if(/#YY#/g.test(tmp)) buf = buf.replace(/#YY#/g,_do.YY);
+		if(/#yy#/g.test(tmp)) buf = buf.replace(/#yy#/g,_do.yy);
+		return buf;
+	} 
 
 	var cacheCorrectiveForm = $('#correctiveForm').html();
 

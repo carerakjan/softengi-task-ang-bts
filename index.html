@@ -214,7 +214,8 @@
 	  	<div class="tab-pane fade" id="submit" ng-controller="submitTab">	
 	  		<div class="row">
 	  			<p class="block-info col-sm-offset-1 col-sm-9 col-xs-8"><span class="glyphicon glyphicon-warning-sign"></span> Please complete the below based on available information. Click on applicable tabs above to enter additional information related to the incident. When complete click '<span class="text-uppecase">Review</span> and <span class="text-uppercase">Submit</span>' tab above.</p>
-	  			<p class="block-info col-sm-2 col-xs-4 text-center"><a class="btn btn-success {{(genForm.$valid)?'':'disabled'}}"><span class="glyphicon glyphicon-ok"></span> Submit</a></p>
+	  			<p class="block-info col-sm-2 col-xs-4 text-center"><a class="btn btn-success {{(genForm.$valid)?'':'disabled'}}"
+	  			ng-click="submit()"><span class="glyphicon glyphicon-ok"></span> Submit</a></p>
 	  		</div>
 	  		<h4 class="row">General Information:</h4>
 	  		<div class="with-table row">
